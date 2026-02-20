@@ -7,13 +7,23 @@ class GenPassResource
     private $generator;
     public function __construct()
     {
-        $generator = new PasswordGenerator();
+        $this->generator = new PasswordGenerator();
     }
 
     //GET /api/password?length=16&upper=true&lower=true&digits=true&symbols=true&avoid_ambiguous=true&exclude=abAB12&require_each=true
     public function get()
     {
-        $this->generator->length = isset($_GET['length']) ? (int)$_GET['length'] : 16;
+
+        if (isset($_GET['length'])) {
+            if ($_GET['length'] < 4 || $_GET['length'] > 128) {
+                http_response_code(400);
+                echo json_encode(['error' => "La longitud debe ser mayor o igual a 4 y menor o igual a 128"]);
+                return;
+            }
+            $this->generator->length = (int)$_GET['length'];
+        } else {
+            $this->generator->length = 16; // valor por defecto
+        }
         $this->generator->upper_enabled = isset($_GET['upper']) ? filter_var($_GET['upper'], FILTER_VALIDATE_BOOLEAN) : true;
         $this->generator->lower_enabled = isset($_GET['lower']) ? filter_var($_GET['lower'], FILTER_VALIDATE_BOOLEAN) : true;
         $this->generator->digits_enabled = isset($_GET['digits']) ? filter_var($_GET['digits'], FILTER_VALIDATE_BOOLEAN) : true;
@@ -37,7 +47,16 @@ class GenPassResource
         header('Content-Type: application/json');
         $data = json_decode(file_get_contents('php://input'), true);
         $this->generator->count = !empty($data['count']) ? (int)$data['count'] : 1;
-        $this->generator->length = !empty($data['length']) ? (int)$data['length'] : 16;
+        if (!empty($data['length'])) {
+            if ($data['length'] < 4 || $data['length'] > 128) {
+                http_response_code(400);
+                echo json_encode(['error' => "La longitud debe ser mayor o igual a 4 y menor o igual a 128"]);
+                return;
+            }
+            $this->generator->length = (int)$data['length'];
+        } else {
+            $this->generator->length = 16; // valor por defecto
+        }
         $this->generator->upper_enabled = !empty($data['upper']) ? filter_var($data['upper'], FILTER_VALIDATE_BOOLEAN) : true;
         $this->generator->lower_enabled = !empty($data['lower']) ? filter_var($data['lower'], FILTER_VALIDATE_BOOLEAN) : true;
         $this->generator->digits_enabled = !empty($data['digits']) ? filter_var($data['digits'], FILTER_VALIDATE_BOOLEAN) : true;
@@ -56,5 +75,3 @@ class GenPassResource
         }
     }
 }
-
-?>
