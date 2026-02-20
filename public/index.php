@@ -16,7 +16,7 @@ $basePath = $scriptName;
 
 $router = new Router('v1', $basePath);
 $router->addRoute('GET', '/password', [new GenPassResource(), 'get']);
-
+$router->addRoute('POST', '/passwords', [new GenPassResource(), 'getMultiple']);
 
 
 $router->dispatch();
