@@ -11,15 +11,15 @@ class PasswordGenerator
     // caracteres ambiguos que a veces se evitan
     private $ambiguous = 'Il1O0o';
 
-    public $length ;
+    public $length;
     public $count = 1;
-    public $upper_enabled ;
-    public $lower_enabled ;
-    public $digits_enabled ;
-    public $symbols_enabled ;
-    public $avoid_ambiguous ;
-    public $exclude ;
-    public $require_each ;
+    public $upper_enabled;
+    public $lower_enabled;
+    public $digits_enabled;
+    public $symbols_enabled;
+    public $avoid_ambiguous;
+    public $exclude;
+    public $require_each;
 
 
     public function generateMultiple(): array
@@ -118,5 +118,18 @@ class PasswordGenerator
         $password = implode('', $password_chars);
         $password = shuffle_secure($password);
         return $password;
+    }
+
+    public function validatePassword($requiments, $password): bool
+    {
+        if(!empty($requiments['minLength']) && strlen($password) < $requiments['minLength']) return false;
+        if(!empty($requiments['maxLength']) && strlen($password) > $requiments['maxLength']) return false;
+        if($requiments['requireUppercase'] && !preg_match('/[A-Z]/', $password)) return false;
+        if($requiments['requireLowercase'] && !preg_match('/[a-z]/', $password)) return false;
+        if($requiments['requireDigits'] && !preg_match('/[0-9]/', $password)) return false;
+        if($requiments['requireSymbols'] && !preg_match('/[' . preg_quote($this->symbols, '/') . ']/', $password)) return false;
+        if($requiments['avoidAmbiguous'] && preg_match('/[' . preg_quote($this->ambiguous, '/') . ']/', $password)) return false;
+        if(!empty($requiments['exclude']) && preg_match('/[' . preg_quote($requiments['exclude'], '/') . ']/', $password)) return false;
+        return true;
     }
 }

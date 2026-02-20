@@ -74,4 +74,25 @@ class GenPassResource
             echo json_encode(['error' => $e->getMessage()]);
         }
     }
+
+    public function passworValidate()
+    {
+        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (empty($data['password'])) {
+            http_response_code(400);
+            echo json_encode(['error' => "El campo 'password' es obligatorio."]);
+            return;
+        }
+        $password = $data['password'];
+        $requiments = $data['requirements'] ?? [];
+        if($this->generator->validatePassword($requiments, $password)){
+            http_response_code(200);
+            echo json_encode(['valid' => true, 'message' => 'La contraseña cumple con los requisitos.']);
+        } else {
+            http_response_code(200);
+            echo json_encode(['valid' => false, 'message' => 'La contraseña no cumple con los requisitos.']);
+        }
+
+    }
 }
