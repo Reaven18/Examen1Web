@@ -1,13 +1,12 @@
 <?php
-require_once '../models/GenPassword.php';
-
+require_once '../models/password.php';
 
 class GenPassResource
 {
     private $generator;
     public function __construct()
     {
-        $this->generator = new PasswordGenerator();
+        $this->generator = new password();
     }
 
     //GET /api/password?length=16&upper=true&lower=true&digits=true&symbols=true&avoid_ambiguous=true&exclude=abAB12&require_each=true
@@ -86,13 +85,13 @@ class GenPassResource
         }
         $password = $data['password'];
         $requiments = $data['requirements'] ?? [];
-        if($this->generator->validatePassword($requiments, $password)){
+        if ($this->generator->validatePassword($requiments, $password)) {
             http_response_code(200);
             echo json_encode(['valid' => true, 'message' => 'La contraseña cumple con los requisitos.']);
         } else {
             http_response_code(200);
             echo json_encode(['valid' => false, 'message' => 'La contraseña no cumple con los requisitos.']);
         }
-
     }
 }
+?>

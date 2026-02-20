@@ -1,6 +1,8 @@
 <?php
-class PasswordGenerator
+
+class password
 {
+
     private $upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     private $lower = 'abcdefghijklmnopqrstuvwxyz';
     private $digits = '0123456789';
@@ -21,7 +23,17 @@ class PasswordGenerator
     public $exclude;
     public $require_each;
 
-
+    public function __construct()
+    {
+        $this->length = 16;
+        $this->upper_enabled = true;
+        $this->lower_enabled = true;
+        $this->digits_enabled = true;
+        $this->symbols_enabled = true;
+        $this->avoid_ambiguous = true;
+        $this->exclude = '';
+        $this->require_each = true;
+    }
     public function generateMultiple(): array
     {
         $passwords = [];
@@ -42,7 +54,7 @@ class PasswordGenerator
         $arr = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
         $n = count($arr);
         for ($i = $n - 1; $i > 0; $i--) {
-            $j = secure_random_int_between(0, $i);
+            $j = $this->secure_random_int_between(0, $i);
             $tmp = $arr[$i];
             $arr[$i] = $arr[$j];
             $arr[$j] = $tmp;
@@ -102,7 +114,7 @@ class PasswordGenerator
         // Si require_each: garantizar al menos un carácter de cada categoría seleccionada
         if ($this->require_each) {
             foreach ($sets as $chars) {
-                $idx = secure_random_int_between(0, strlen($chars) - 1);
+                $idx = $this->secure_random_int_between(0, strlen($chars) - 1);
                 $password_chars[] = $chars[$idx];
             }
         }
@@ -110,26 +122,29 @@ class PasswordGenerator
         // Rellenar el resto de la longitud con caracteres del pool
         $needed = $this->length - count($password_chars);
         for ($i = 0; $i < $needed; $i++) {
-            $idx = secure_random_int_between(0, strlen($pool) - 1);
+            $idx = $this->secure_random_int_between(0, strlen($pool) - 1);
             $password_chars[] = $pool[$idx];
         }
 
         // Mezclar de forma segura y devolver
         $password = implode('', $password_chars);
-        $password = shuffle_secure($password);
+        $password = $this->shuffle_secure($password);
         return $password;
     }
 
     public function validatePassword($requiments, $password): bool
     {
-        if(!empty($requiments['minLength']) && strlen($password) < $requiments['minLength']) return false;
-        if(!empty($requiments['maxLength']) && strlen($password) > $requiments['maxLength']) return false;
-        if($requiments['requireUppercase'] && !preg_match('/[A-Z]/', $password)) return false;
-        if($requiments['requireLowercase'] && !preg_match('/[a-z]/', $password)) return false;
-        if($requiments['requireDigits'] && !preg_match('/[0-9]/', $password)) return false;
-        if($requiments['requireSymbols'] && !preg_match('/[' . preg_quote($this->symbols, '/') . ']/', $password)) return false;
-        if($requiments['avoidAmbiguous'] && preg_match('/[' . preg_quote($this->ambiguous, '/') . ']/', $password)) return false;
-        if(!empty($requiments['exclude']) && preg_match('/[' . preg_quote($requiments['exclude'], '/') . ']/', $password)) return false;
+        if (!empty($requiments['minLength']) && strlen($password) < $requiments['minLength']) return false;
+        if (!empty($requiments['maxLength']) && strlen($password) > $requiments['maxLength']) return false;
+        if (!empty($requiments['requireUppercase']) && !preg_match('/[A-Z]/', $password)) return false;
+        if (!empty($requiments['requireLowercase']) && !preg_match('/[a-z]/', $password)) return false;
+        if (!empty($requiments['requireDigits']) && !preg_match('/[0-9]/', $password)) return false;
+        if (!empty($requiments['requireSymbols']) && !preg_match('/[' . preg_quote($this->symbols, '/') . ']/', $password)) return false;
+        if (!empty($requiments['avoidAmbiguous']) && preg_match('/[' . preg_quote($this->ambiguous, '/') . ']/', $password)) return false;
+        if (!empty($requiments['exclude']) && preg_match('/[' . preg_quote($requiments['exclude'], '/') . ']/', $password)) return false;
         return true;
     }
 }
+
+
+?>
