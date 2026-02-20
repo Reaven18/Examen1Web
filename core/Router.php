@@ -2,12 +2,11 @@
 class Router
 {
     private $routes = [];
-    private $version;
+
     private $basePath;
 
-    public function __construct($version = 'v1', $basePath = '')
+    public function __construct( $basePath = '')
     {
-        $this->version = $version;
         $this->basePath = rtrim($basePath, '/');
     }
 
@@ -15,7 +14,7 @@ class Router
     {
         $this->routes[] = [
             'method' => strtoupper($method),
-            'path' => "/api/{$this->version}" . $path,
+            'path' => "/api" . $path,
             'handler' => $handler
         ];
     }
@@ -29,7 +28,7 @@ class Router
             $uri = substr($uri, strlen($this->basePath));
         }
 
-        // Asegurar que la URI comience con 
+        // Asegurar que la URI comience con
         $uri = '/' . ltrim($uri, '/');
 
         foreach ($this->routes as $route) {
@@ -46,4 +45,3 @@ class Router
         echo json_encode(['message' => 'Ruta no encontrada', 'uri' => $uri]);
     }
 }
-?>
